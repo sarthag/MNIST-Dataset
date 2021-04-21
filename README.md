@@ -1,2 +1,2 @@
 # MNIST-Dataset
-Solving the MNIST Dataset using a Shallow NN, KNN Algorithm and a SVM
+Solving the MNIST Dataset in different ways
