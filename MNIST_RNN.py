@@ -138,7 +138,7 @@ class LSTM(nn.Module):
     self.hidden_size = hidden_size
     self.num_layers = num_layers
     self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first = True)
-    self.fc = nn.Linear(hidden_size*sequence_length, num_classes)
+    self.fc = nn.Linear(hidden_size, num_classes)
 
 
   def forward(self, x):
@@ -146,13 +146,33 @@ class LSTM(nn.Module):
     c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
 
     out, _ = self.lstm(x, (h0,c0))
-    out = out.reshape(out.shape[0], -1)
-    out = self.fc(out)
+    out = self.fc(out[:, -1, :])
     
     return out
 
 model_LSTM = LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 basic_test(model_LSTM)
+
+class BLSTM(nn.Module):
+  def __init__(self, input_size, hidden_size, num_layers, num_classes):
+    super(BLSTM,self).__init__()
+    self.hidden_size = hidden_size
+    self.num_layers = num_layers
+    self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first = True, bidirectional = True)
+    self.fc = nn.Linear(hidden_size*2, num_classes)
+
+
+  def forward(self, x):
+    h0 = torch.zeros(self.num_layers*2, x.size(0), self.hidden_size).to(device)
+    c0 = torch.zeros(self.num_layers*2, x.size(0), self.hidden_size).to(device)
+
+    out, _ = self.lstm(x, (h0,c0))
+    out = self.fc(out[:, -1, :])
+    
+    return out
+
+model_BLSTM = BLSTM(input_size, hidden_size, num_layers, num_classes).to(device)
+basic_test(model_BLSTM)
 
 #loading the data
 
@@ -178,3 +198,5 @@ model_RNN = train(model_RNN)
 model_GRU = train(model_GRU)
 
 model_LSTM = train(model_LSTM)
+
+model_BLSTM = train(model_BLSTM)
